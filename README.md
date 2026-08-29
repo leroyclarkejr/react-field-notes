@@ -186,6 +186,30 @@ bundler that replaces `process.env.NODE_ENV` with `"production"` at build
 time (Vite, webpack, Next.js, etc. all do this by default) can dead-code
 eliminate the overlay's implementation entirely from a production bundle.
 
+## Credits
+
+**[react-grab](https://react-grab.com)** by **[Aiden Bai](https://github.com/aidenybai)**
+([source](https://github.com/aidenybai/react-grab), MIT) does the genuinely hard
+part of this workflow: mapping a DOM element back to the React component that
+rendered it, and to the source file and line it came from. `react-field-notes`
+calls two methods on its public API and gets that for free.
+
+It is what turns a note from *"the button in the header"* into a component name
+and a `file:line` an agent can open. This package is an annotation and batching
+layer on top of that capability, not a replacement for it — install react-grab
+alongside it and you get both.
+
+**[Lucide](https://lucide.dev)** (ISC), and through it
+**[Feather](https://feathericons.com)** by Cole Bemis (MIT), provide the icon
+path data inlined in `src/icons.tsx`, which is what let this package drop its
+icon-library dependency without drawing its own glyphs.
+
 ## License
 
-MIT © Leroy Clarke Jr.
+MIT © Leroy Clarke Jr. — see [LICENSE](./LICENSE).
+
+This package has no runtime dependencies, but it does bundle third-party icon
+path data and integrates with an optional peer dependency. Both are documented
+with their full license texts in
+[THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md), which ships with the
+published package.

@@ -1,8 +1,13 @@
 /*
- * Icon paths adapted from Lucide (https://lucide.dev), ISC License.
- * Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022
- * as part of Feather (MIT). All other copyright (c) for Lucide are held
- * by Lucide Contributors 2022.
+ * Icon path data adapted from Lucide (https://lucide.dev).
+ *
+ * ISC License, Copyright (c) 2026 Lucide Icons and Contributors.
+ *
+ * IconCheck, IconSquare, IconTrash and IconX derive from icons Lucide
+ * inherited from Feather (https://feathericons.com) and additionally carry
+ * the MIT License, Copyright (c) 2013-present Cole Bemis.
+ *
+ * Full license texts: see THIRD-PARTY-NOTICES.md at the repository root.
  */
 
 interface IconProps {
