@@ -1,0 +1,59 @@
+{
+  "name": "react-field-notes",
+  "version": "0.0.0",
+  "description": "Dev-time annotation overlay for React apps. Tap an element, leave a note, export markdown for your coding agent.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm typecheck && pnpm test && pnpm build"
+  },
+  "keywords": [
+    "react",
+    "annotation",
+    "overlay",
+    "devtools",
+    "feedback",
+    "react-grab"
+  ],
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.6",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitest/coverage-v8": "^4.1.11",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-grab": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "react-grab": {
+      "optional": true
+    }
+  }
+}
