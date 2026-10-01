@@ -2,7 +2,7 @@
 
 A dev-time annotation overlay for React apps. Tap an element (or a hotkey), leave a
 note, export markdown you can hand straight to your coding agent. Zero runtime
-dependencies, tree-shakes out of production builds.
+dependencies, and off in production builds by default.
 
 ## Install
 
@@ -232,6 +232,18 @@ No further configuration needed — `react-field-notes` detects it automatically
 and initializes it with its own overlay and hotkeys disabled, so only its
 query API is used.
 
+If your app already imports `react-grab` itself (to use its own grab
+shortcut), that import starts react-grab's floating toolbar. Hide it while
+keeping the rest of react-grab working:
+
+```ts
+if (import.meta.env.DEV) {
+  void import('react-grab').then(({ registerPlugin }) => {
+    registerPlugin({ name: 'hide-toolbar', theme: { toolbar: { enabled: false } } });
+  });
+}
+```
+
 ## Works inside modal dialogs
 
 Annotating an element inside a modal dialog — Chakra UI v3, Ark, Radix, or
@@ -242,15 +254,24 @@ registers its own capture-phase listeners first and shields its own subtree
 so the dialog never sees them. Open a dialog, trigger the overlay, and tap an
 element inside it — the dialog stays open and the note captures correctly.
 
-## Dev-only, tree-shakes out of production
+## Dev-only by default
 
-`<FieldNotes enabled={...} />` defaults `enabled` to
-`process.env.NODE_ENV !== 'production'`. When `enabled` is `false` the
-component renders `null` and does no work. Because the package has
-`"sideEffects": false` and does no module-level side effects of its own, a
-bundler that replaces `process.env.NODE_ENV` with `"production"` at build
-time (Vite, webpack, Next.js, etc. all do this by default) can dead-code
-eliminate the overlay's implementation entirely from a production bundle.
+`<FieldNotes />` defaults `enabled` to `process.env.NODE_ENV !== 'production'`,
+which Vite, webpack and Next.js all resolve at build time. In a production
+build it renders `null` and does no work. Pass `enabled` explicitly to turn it
+on somewhere else, such as a staging deploy.
+
+The component's code is still in the bundle, though, because it is imported.
+To strip it out entirely, gate the element on a build-time constant so the
+bundler can drop the import:
+
+```tsx
+// Vite
+{import.meta.env.DEV && <FieldNotes />}
+
+// webpack / Next.js
+{process.env.NODE_ENV !== 'production' && <FieldNotes />}
+```
 
 ## Credits
 

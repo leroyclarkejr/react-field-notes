@@ -11,6 +11,7 @@ describe('getReactGrabApi', () => {
     resetReactGrabApiForTests();
     delete window.__REACT_GRAB__;
     vi.doUnmock('react-grab');
+    vi.doUnmock('react-grab/core');
     vi.resetModules();
   });
 
@@ -25,17 +26,29 @@ describe('getReactGrabApi', () => {
   });
 
   describe('when react-grab is installed but has not set its global', () => {
-    const init = vi.fn(() => fakeApi);
+    const coreInit = vi.fn(() => fakeApi);
+    const mainEntryLoaded = vi.fn();
 
     beforeEach(() => {
-      init.mockClear();
-      vi.doMock('react-grab', () => ({ init }));
+      coreInit.mockClear();
+      mainEntryLoaded.mockClear();
+      vi.doMock('react-grab/core', () => ({ init: coreInit }));
+      vi.doMock('react-grab', () => {
+        mainEntryLoaded();
+        return { init: vi.fn(() => fakeApi) };
+      });
     });
 
-    test('initialises it with its own overlay disabled', async () => {
+    test('initialises the core entry with its own overlay disabled', async () => {
       await getReactGrabApi();
 
-      expect(init).toHaveBeenCalledWith({ enabled: false });
+      expect(coreInit).toHaveBeenCalledWith({ enabled: false });
+    });
+
+    test('never loads the main entry, which would start react-grab with its toolbar', async () => {
+      await getReactGrabApi();
+
+      expect(mainEntryLoaded).not.toHaveBeenCalled();
     });
 
     test('returns the initialised api', async () => {
@@ -45,8 +58,29 @@ describe('getReactGrabApi', () => {
     });
   });
 
+  describe('when the installed react-grab predates the core entry', () => {
+    const mainInit = vi.fn(() => fakeApi);
+
+    beforeEach(() => {
+      mainInit.mockClear();
+      vi.doMock('react-grab/core', () => {
+        throw new Error("Cannot find module 'react-grab/core'");
+      });
+      vi.doMock('react-grab', () => ({ init: mainInit }));
+    });
+
+    test('falls back to the main entry', async () => {
+      const result = await getReactGrabApi();
+
+      expect(result).toBe(fakeApi);
+    });
+  });
+
   describe('when react-grab is not installed', () => {
     beforeEach(() => {
+      vi.doMock('react-grab/core', () => {
+        throw new Error("Cannot find module 'react-grab/core'");
+      });
       vi.doMock('react-grab', () => {
         throw new Error("Cannot find module 'react-grab'");
       });

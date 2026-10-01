@@ -27,12 +27,22 @@ export function resetReactGrabApiForTests(): void {
   apiPromise = null;
 }
 
+function importReactGrab(subpath: string): Promise<ReactGrabModule> {
+  const specifier = ['react', 'grab'].join('-') + subpath;
+  return import(/* @vite-ignore */ specifier) as Promise<ReactGrabModule>;
+}
+
 /**
  *
  * Lazily resolves react-grab's API. Prefers the global a host's own
- * `import('react-grab')` already installed; otherwise imports it and inits it
- * disabled, so react-grab's own overlay and hotkeys stay off and only its
- * query methods are used.
+ * `import('react-grab')` already installed; otherwise inits it disabled, so
+ * react-grab's own overlay and hotkeys stay off and only its query methods are
+ * used.
+ *
+ * Imports `react-grab/core` first: the main entry starts react-grab with its
+ * full UI (including a bottom-centre toolbar) as a side effect of being
+ * imported, before `init({ enabled: false })` can run. The main entry is only
+ * a fallback for react-grab versions that predate `/core`.
  *
  * The specifier is built at runtime so bundlers cannot statically resolve it.
  * Without that, Vite and Rollup fail the build outright in projects that have
@@ -42,11 +52,9 @@ export function resetReactGrabApiForTests(): void {
 export async function getReactGrabApi(): Promise<ReactGrabAPI | null> {
   if (typeof window === 'undefined') return null;
   if (window.__REACT_GRAB__) return window.__REACT_GRAB__;
-  if (!apiPromise) {
-    const specifier = ['react', 'grab'].join('-');
-    apiPromise = import(/* @vite-ignore */ specifier)
-      .then((mod: ReactGrabModule) => mod.init({ enabled: false }))
-      .catch(() => null);
-  }
+  apiPromise ??= importReactGrab('/core')
+    .catch(() => importReactGrab(''))
+    .then((mod) => mod.init({ enabled: false }))
+    .catch(() => null);
   return apiPromise;
 }

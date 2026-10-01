@@ -20,18 +20,24 @@ export interface FieldNotesProps {
 // is not a known global here. This declares just enough of its shape,
 // module-scoped rather than global, to type-check the read below without
 // pulling in Node's ambient types or asserting `any`.
-declare const process: { env?: { NODE_ENV?: string } } | undefined;
+declare const process: { env: { NODE_ENV?: string } };
 
 /**
  *
- * Reads NODE_ENV without assuming a bundler defined `process`. Anything that is
- * not an explicit "production" leaves the overlay on, so a misconfigured
- * environment fails toward the tool being available rather than silently gone.
+ * Reads NODE_ENV in the one spelling every bundler replaces at build time:
+ * the bare member expression `process.env.NODE_ENV`. Vite 6 and webpack leave
+ * optional-chained reads (`process?.env?.NODE_ENV`) untouched, and since
+ * `process` does not exist in the browser that read threw, the catch returned
+ * true, and the overlay shipped to production. productionBundle.test.ts
+ * guards the spelling.
+ *
+ * Without a bundler define, the ReferenceError still lands in the catch and
+ * leaves the overlay on, failing toward the tool being available.
  *
  */
 function defaultEnabled(): boolean {
   try {
-    return process?.env?.NODE_ENV !== 'production';
+    return process.env.NODE_ENV !== 'production';
   } catch {
     return true;
   }
