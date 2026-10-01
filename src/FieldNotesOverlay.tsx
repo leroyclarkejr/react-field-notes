@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CaptureRect } from './types';
 import { useFieldNotes } from './FieldNotesProvider';
@@ -10,6 +10,14 @@ import { AnnotationList } from './components/AnnotationList';
 import { Launcher } from './components/Launcher';
 import type { LauncherPosition } from './components/Launcher';
 import { injectStyles } from './styles';
+
+/**
+ * useLayoutEffect on the client, useEffect on the server.
+ *
+ * React 18 warns when useLayoutEffect runs during SSR, and the peer range
+ * still includes 18.
+ */
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 interface FieldNotesOverlayProps {
   launcher?: boolean;
@@ -58,8 +66,12 @@ export function FieldNotesOverlay({
 
   // The shield listeners are registered once and never re-registered, so they
   // read live state through this ref rather than through their closure.
+  // Synced in a layout effect so the ref is current before the browser can
+  // dispatch the next pointer event, without writing a ref during render.
   const live = useRef({ active, mode, draft, showList, beginDraft });
-  live.current = { active, mode, draft, showList, beginDraft };
+  useIsomorphicLayoutEffect(() => {
+    live.current = { active, mode, draft, showList, beginDraft };
+  });
 
   useEffect(() => {
     injectStyles();

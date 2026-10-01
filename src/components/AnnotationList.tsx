@@ -41,7 +41,7 @@ export function AnnotationList({ notes, onDelete, onClear, onClose }: Annotation
       </div>
 
       <div className="rfn-list-toolbar">
-        <button type="button" data-active="true" onClick={handleCopyAll} disabled={notes.length === 0}>
+        <button type="button" data-active="true" onClick={() => void handleCopyAll()} disabled={notes.length === 0}>
           {copyStatus === 'copied' ? (
             <>
               <IconCheck /> Copied!

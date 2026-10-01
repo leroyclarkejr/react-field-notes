@@ -3,3 +3,7 @@ dist
 coverage
 .DS_Store
 *.log
+.tsup
+.superpowers/
+.claude/settings.local.json
+.claude/worktrees/

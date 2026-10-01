@@ -18,7 +18,7 @@ function stubRect(el: Element, rect: { left: number; top: number; width: number;
     x: rect.left,
     y: rect.top,
     toJSON: () => ({}),
-  } as DOMRect);
+  });
 }
 
 describe('elementsInRect', () => {
@@ -139,7 +139,7 @@ describe('buildRegionTargetWithContext', () => {
   test('attaches the primary element component stack', async () => {
     document.body.innerHTML = '<section><button>A</button></section>';
     const section = document.querySelector('section') as Element;
-    const getContext = async () => fakeContext;
+    const getContext = () => Promise.resolve(fakeContext);
 
     const result = await buildRegionTargetWithContext({ x: 0, y: 0, w: 50, h: 50 }, [section], getContext);
 
@@ -147,7 +147,7 @@ describe('buildRegionTargetWithContext', () => {
   });
 
   test('omits the component stack for an empty region', async () => {
-    const getContext = async () => fakeContext;
+    const getContext = () => Promise.resolve(fakeContext);
 
     const result = await buildRegionTargetWithContext({ x: 0, y: 0, w: 50, h: 50 }, [], getContext);
 

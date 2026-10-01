@@ -89,10 +89,13 @@ export function FieldNotesProvider({
   }, [enabled, storageKey, notes]);
 
   // When the overlay deactivates, drop back to navigate mode so the next
-  // activation starts without a capture layer blocking the app.
-  useEffect(() => {
+  // activation starts without a capture layer blocking the app. Adjusted during
+  // render rather than in an effect so no frame ever paints a stale mode.
+  const [prevActive, setPrevActive] = useState(active);
+  if (active !== prevActive) {
+    setPrevActive(active);
     if (!active) setMode('off');
-  }, [active]);
+  }
 
   const registerTap = useCallback(
     (overrideCount?: number) => {

@@ -10,7 +10,7 @@ describe('getReactGrabApi', () => {
 
   describe('when react-grab has already installed its global', () => {
     test('returns the global instance', async () => {
-      const api = { getDisplayName: () => 'Button', getStackContext: async () => 'stack' };
+      const api = { getDisplayName: () => 'Button', getStackContext: () => Promise.resolve('stack') };
       window.__REACT_GRAB__ = api;
 
       const result = await getReactGrabApi();
