@@ -7,12 +7,17 @@ dependencies, tree-shakes out of production builds.
 ## Install
 
 ```bash
+npm install -D react-field-notes
+# or
 pnpm add -D react-field-notes
+# or
+yarn add -D react-field-notes
 ```
 
-`react`, `react-dom`, and `react-grab` are peer dependencies. `react-grab` is
-**optional** — see [Enhanced context with react-grab](#enhanced-context-with-react-grab)
-below.
+Requires React 18 or 19. `react`, `react-dom`, and `react-grab` are peer
+dependencies; `react-grab` is **optional** but recommended — it is what adds
+component names and `file:line` references to each note. See
+[Enhanced context with react-grab](#enhanced-context-with-react-grab).
 
 ## Usage
 
@@ -32,9 +37,30 @@ export function App() {
 }
 ```
 
-By default it's active outside production, opens with `Cmd/Ctrl+Shift+N` or a
-seven-tap gesture on its floating launcher button, and stores notes in
-`localStorage`.
+Start your dev server as usual. By default the overlay is active outside
+production, opens with `Cmd/Ctrl+Shift+N` or a click on the floating launcher
+button in the bottom-right corner, and stores notes in `localStorage`.
+
+### Next.js (App Router)
+
+The package ships with a `'use client'` directive, so it can be rendered
+straight from a server `layout.tsx`:
+
+```tsx
+// app/layout.tsx
+import { FieldNotes } from 'react-field-notes';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <FieldNotes />
+      </body>
+    </html>
+  );
+}
+```
 
 ### Composed form
 
@@ -61,6 +87,46 @@ export function App() {
 }
 ```
 
+## Leaving notes
+
+1. **Open the overlay** — press `Cmd/Ctrl+Shift+N`, or click the launcher. A
+   toolbar appears with **Tap**, **Region**, a notes counter, and **Exit**.
+2. **Pick a capture mode.**
+   - **Tap** highlights the element under your pointer; click to select it.
+   - **Region** lets you drag a rectangle over a group of elements.
+3. **Write the note** in the sheet that opens ("What do you want to change
+   here?") and press **Save**. Repeat for as many changes as you like — notes
+   survive reloads.
+4. **Open the list** with the counter button to review, delete, or clear
+   notes.
+5. **Press Copy all** and paste the result into your coding agent.
+
+Copying uses the Clipboard API, which browsers only allow on `localhost` or
+HTTPS. On a phone hitting your dev server over a LAN IP, Copy all will report
+a failure; use an HTTPS tunnel or annotate on the desktop instead.
+
+With no mode selected the overlay stays in *navigate* mode: the app works
+normally, so you can click through to the next screen and keep annotating.
+
+The copied markdown is grouped by route. With `react-grab` installed, each
+note also carries the component's source location:
+
+```md
+## UI Edit Notes (2)
+
+### /settings
+
+1. SaveButton — make this the primary colour and move it to the right
+   - path: #root > main > form > div.actions > button
+   - stack: in SaveButton (at src/settings/SaveButton.tsx:12)
+
+2. Region (3 elements) — too much vertical space between these rows
+   - path: #root > main > section.rows > div.row:nth-of-type(1)
+   - div "Email notifications" — #root > main > section.rows > div.row:nth-of-type(1)
+   - div "Push notifications" — #root > main > section.rows > div.row:nth-of-type(2)
+   - div "Weekly digest" — #root > main > section.rows > div.row:nth-of-type(3)
+```
+
 ## Props
 
 All props are on `<FieldNotes />`. The composed form takes the same values
@@ -74,7 +140,7 @@ split between `FieldNotesProvider` (`enabled`, `storageKey`, `tapCount`,
 | `launcher`          | `boolean`               | `true`                                    | Whether to render the floating launcher button. |
 | `launcherPosition`  | `LauncherPosition`      | `'bottom-right'`                          | One of `'bottom-right' \| 'bottom-left' \| 'top-right' \| 'top-left'`. |
 | `storageKey`        | `string`                | internal default key                      | `localStorage` key notes are persisted under. Set this if you run multiple field-notes instances or apps on the same origin. |
-| `tapCount`          | `number`                | `7`                                       | Number of taps within `tapWindowMs` needed to toggle the overlay via the launcher or an attribute trigger. |
+| `tapCount`          | `number`                | `7`                                       | Number of taps within `tapWindowMs` needed to toggle the overlay via an [attribute trigger](#attribute-triggers). The launcher opens on a single click. |
 | `tapWindowMs`       | `number`                | `3000`                                    | Rolling window, in milliseconds, that taps must fall within to count toward `tapCount`. |
 | `accent`            | `string`                | `'#e5484d'`                               | Overrides the `--rfn-accent` CSS custom property (see [Theming](#theming)). |
 

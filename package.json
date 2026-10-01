@@ -1,6 +1,6 @@
 {
   "name": "react-field-notes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dev-time annotation overlay for React apps. Tap an element, leave a note, export markdown for your coding agent.",
   "license": "MIT",
   "author": "Leroy Clarke Jr.",
