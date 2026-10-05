@@ -97,7 +97,7 @@ export const CSS = `
   padding: 6px 8px;
   background: var(--rfn-bg);
   border: 1px solid var(--rfn-border);
-  border-radius: 999px;
+  border-radius: calc(var(--rfn-radius) + 2px);
   box-shadow: var(--rfn-shadow);
   max-width: calc(100vw - 16px);
   overflow-x: auto;
@@ -184,6 +184,7 @@ export const CSS = `
   color: var(--rfn-fg-muted);
   word-break: break-all;
 }
+.rfn-note-actions { display: flex; flex-shrink: 0; gap: 2px; }
 .rfn-icon-btn { padding: 5px; border-color: transparent; background: transparent; }
 
 /* Launcher */

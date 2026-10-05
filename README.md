@@ -99,7 +99,8 @@ export function App() {
    survive reloads.
 4. **Open the list** with the counter button to review, delete, or clear
    notes.
-5. **Press Copy all** and paste the result into your coding agent.
+5. **Press Copy all** and paste the result into your coding agent, or use the copy
+   button on a single note to send just that one.
 
 Copying uses the Clipboard API, which browsers only allow on `localhost` or
 HTTPS. On a phone hitting your dev server over a LAN IP, Copy all will report

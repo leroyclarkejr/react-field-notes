@@ -8,17 +8,18 @@ it integrates with at runtime.
 
 ## Lucide — bundled
 
-`src/icons.tsx` contains seven inline SVG icon components whose path data is
+`src/icons.tsx` contains eight inline SVG icon components whose path data is
 adapted from [Lucide](https://lucide.dev). This path data is compiled into
 `dist/index.js`, so its licenses travel with this package.
 
-Four of the seven are Lucide icons that originate in the
+Five of the eight are Lucide icons that originate in the
 [Feather](https://feathericons.com) project and carry Feather's MIT license in
 addition to Lucide's ISC:
 
 | Component in this package | Lucide icon | Applicable license |
 | --- | --- | --- |
 | `IconCheck` | `check` | ISC (Lucide) + MIT (Feather) |
+| `IconCopy` | `copy` | ISC (Lucide) + MIT (Feather) |
 | `IconSquare` | `square` | ISC (Lucide) + MIT (Feather) |
 | `IconTrash` | `trash-2` | ISC (Lucide) + MIT (Feather) |
 | `IconX` | `x` | ISC (Lucide) + MIT (Feather) |

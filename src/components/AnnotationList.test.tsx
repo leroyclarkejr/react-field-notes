@@ -91,6 +91,92 @@ describe('AnnotationList', () => {
     });
   });
 
+  describe('when the user copies a single note', () => {
+    const testOtherNote: FieldNote = {
+      id: 'n2',
+      createdAt: 2,
+      route: '/settings',
+      mode: 'element',
+      comment: 'tighten the padding',
+      target: { label: 'div "Card"', domPath: 'div', rect: { x: 0, y: 0, w: 1, h: 1 } },
+    };
+
+    test('writes that note to the clipboard', async () => {
+      const user = userEvent.setup();
+      const writeText = vi.spyOn(navigator.clipboard, 'writeText');
+      render(
+        <AnnotationList notes={[testNote, testOtherNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+      );
+
+      await user.click(screen.getAllByRole('button', { name: 'Copy note' })[1]!);
+
+      expect(writeText).toHaveBeenCalledWith(expect.stringContaining('tighten the padding'));
+    });
+
+    test('leaves the other notes out of the clipboard', async () => {
+      const user = userEvent.setup();
+      const writeText = vi.spyOn(navigator.clipboard, 'writeText');
+      render(
+        <AnnotationList notes={[testNote, testOtherNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+      );
+
+      await user.click(screen.getAllByRole('button', { name: 'Copy note' })[1]!);
+
+      expect(writeText).toHaveBeenCalledWith(expect.not.stringContaining('make it bigger'));
+    });
+
+    test('shows the copied state inside that note button', async () => {
+      const user = userEvent.setup();
+      render(
+        <AnnotationList notes={[testNote, testOtherNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+      );
+
+      await user.click(screen.getAllByRole('button', { name: 'Copy note' })[1]!);
+
+      expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
+    });
+
+    test('keeps the other note buttons unchanged', async () => {
+      const user = userEvent.setup();
+      render(
+        <AnnotationList notes={[testNote, testOtherNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+      );
+      await user.click(screen.getAllByRole('button', { name: 'Copy note' })[1]!);
+      await screen.findByRole('button', { name: 'Copied' });
+
+      expect(screen.getAllByRole('button', { name: 'Copy note' })).toHaveLength(1);
+    });
+
+    test('restores the button after the feedback delay', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ delay: null });
+      render(
+        <AnnotationList notes={[testNote, testOtherNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+      );
+      await user.click(screen.getAllByRole('button', { name: 'Copy note' })[1]!);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000);
+      });
+
+      expect(screen.getAllByRole('button', { name: 'Copy note' })).toHaveLength(2);
+    });
+
+    describe('when the clipboard write fails', () => {
+      test('shows failure feedback on that note button', async () => {
+        const user = userEvent.setup();
+        vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'));
+        render(
+          <AnnotationList notes={[testNote, testOtherNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+        );
+
+        await user.click(screen.getAllByRole('button', { name: 'Copy note' })[1]!);
+
+        expect(await screen.findByRole('button', { name: 'Copy failed, try again' })).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('when the user deletes a note', () => {
     test('calls onDelete with the note id', async () => {
       const user = userEvent.setup();
