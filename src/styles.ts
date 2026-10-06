@@ -40,6 +40,15 @@ export const CSS = `
   color: inherit;
   margin: 0;
 }
+/*
+ * iOS Safari zooms the page when a focused control renders below 16px and does
+ * not zoom back out, so the composer's autofocused textarea zoomed the whole
+ * host app at the inherited 14px. Hosts cannot fix this from outside: their own
+ * 16px floor (usually a bare \`textarea\` selector) loses to .rfn-root textarea.
+ */
+.rfn-root textarea {
+  font-size: 16px;
+}
 .rfn-root button {
   cursor: pointer;
   border: 1px solid var(--rfn-border);
@@ -119,14 +128,17 @@ export const CSS = `
 /* Composer */
 .rfn-composer {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: ${Z_CHROME};
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   padding: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
   background: var(--rfn-bg);
-  border-top: 1px solid var(--rfn-border);
+  border: 1px solid var(--rfn-border);
+  border-radius: calc(var(--rfn-radius) + 2px);
   box-shadow: var(--rfn-shadow);
 }
 .rfn-composer-label {

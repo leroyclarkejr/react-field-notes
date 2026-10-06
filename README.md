@@ -94,7 +94,7 @@ export function App() {
 2. **Pick a capture mode.**
    - **Tap** highlights the element under your pointer; click to select it.
    - **Region** lets you drag a rectangle over a group of elements.
-3. **Write the note** in the sheet that opens ("What do you want to change
+3. **Write the note** in the dialog that opens ("What do you want to change
    here?") and press **Save**. Repeat for as many changes as you like — notes
    survive reloads.
 4. **Open the list** with the counter button to review, delete, or clear
