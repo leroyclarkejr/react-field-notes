@@ -119,6 +119,7 @@ note also carries the component's source location:
 
 1. SaveButton — make this the primary colour and move it to the right
    - path: #root > main > form > div.actions > button
+   - source: src/settings/SaveButton.tsx:12
    - stack: in SaveButton (at src/settings/SaveButton.tsx:12)
 
 2. Region (3 elements) — too much vertical space between these rows
@@ -244,6 +245,32 @@ if (import.meta.env.DEV) {
   });
 }
 ```
+
+## Open in editor
+
+On desktop, in a development build, the toolbar has a third mode: **Code**.
+Click any element and the file where it was written opens in your editor at
+the right line. No note is created, and the mode stays on so you can keep
+clicking.
+
+Notes captured on an element also remember their source location, so the
+composer and each row in the notes list carry an open-in-editor button, and
+the copied markdown gains a `source:` line.
+
+- **Desktop only.** The controls appear only with a hovering, precise pointer
+  (`(hover: hover) and (pointer: fine)`). A phone pointed at the same dev
+  server still records the source location in its notes, but cannot open
+  files.
+- **Development builds only.** The location comes from the debug info React
+  keeps in development. In a production build the controls are hidden.
+- **Vite dev server.** The file is opened through Vite's `/__open-in-editor`
+  endpoint, which launches whichever editor it detects; set `LAUNCH_EDITOR`
+  to override it. Other dev servers are not supported yet: the click reports
+  "Could not open the editor".
+- **No `react-grab` needed.** This works with or without it.
+- **Library components resolve to your code.** Clicking the inside of a
+  design-system button opens the file in your app that used it, not a file in
+  `node_modules`.
 
 ## Works inside modal dialogs
 

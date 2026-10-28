@@ -1,4 +1,5 @@
 import type { FieldNote } from '../types';
+import { formatSource } from './elementContext';
 
 export const DEFAULT_STORAGE_KEY = 'react-field-notes:v1';
 
@@ -45,6 +46,9 @@ export function toMarkdown(notes: FieldNote[]): string {
     routeNotes.forEach((note, index) => {
       lines.push(`${index + 1}. ${note.target.label} — ${note.comment}`);
       lines.push(`   - path: ${note.target.domPath}`);
+      if (note.target.source) {
+        lines.push(`   - source: ${formatSource(note.target.source)}`);
+      }
       if (note.target.componentStack) {
         lines.push(`   - stack: ${note.target.componentStack}`);
       }

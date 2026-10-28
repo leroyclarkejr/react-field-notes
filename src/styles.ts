@@ -158,6 +158,43 @@ export const CSS = `
 }
 .rfn-composer textarea:focus-visible { outline: 2px solid var(--rfn-accent); outline-offset: 1px; }
 .rfn-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.rfn-source {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -4px 0 8px;
+  font-size: 12px;
+  color: var(--rfn-fg-muted);
+}
+.rfn-source-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  word-break: break-all;
+}
+
+/*
+ * Editor status. Docked to the bottom edge rather than under the toolbar: it
+ * also reports opens started from the composer and the full-screen notes
+ * list, where the toolbar is not rendered. Never interactive, so it must not
+ * take pointer events from whatever sits beneath it.
+ */
+.rfn-status {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: ${Z_CHROME};
+  max-width: calc(100vw - 32px);
+  padding: 6px 12px;
+  background: var(--rfn-bg);
+  border: 1px solid var(--rfn-border);
+  border-radius: var(--rfn-radius);
+  box-shadow: var(--rfn-shadow);
+  font-size: 12px;
+  word-break: break-all;
+  pointer-events: none;
+}
+.rfn-status[role="alert"] { border-color: var(--rfn-accent); }
 
 /* List */
 .rfn-list {

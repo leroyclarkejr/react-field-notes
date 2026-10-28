@@ -1,18 +1,36 @@
 import { useState } from 'react';
-import type { FieldNoteTarget } from '../types';
+import type { FieldNoteSource, FieldNoteTarget } from '../types';
+import { formatSource } from '../lib/elementContext';
+import { IconCode } from '../icons';
 
 interface AnnotationComposerProps {
   target: FieldNoteTarget;
   onSave: (comment: string) => void;
   onCancel: () => void;
+  onOpenSource?: (source: FieldNoteSource) => void;
 }
 
-export function AnnotationComposer({ target, onSave, onCancel }: AnnotationComposerProps) {
+export function AnnotationComposer({ target, onSave, onCancel, onOpenSource }: AnnotationComposerProps) {
   const [comment, setComment] = useState('');
+  const { source } = target;
 
   return (
     <div className="rfn-root rfn-composer">
       <p className="rfn-composer-label">{target.label}</p>
+      {source && onOpenSource && (
+        <div className="rfn-source">
+          <span className="rfn-source-path">{formatSource(source)}</span>
+          <button
+            type="button"
+            className="rfn-icon-btn"
+            aria-label="Open in editor"
+            title="Open in editor"
+            onClick={() => onOpenSource(source)}
+          >
+            <IconCode size={16} />
+          </button>
+        </div>
+      )}
       <textarea
         autoFocus
         value={comment}

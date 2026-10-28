@@ -3,7 +3,7 @@
  *
  * ISC License, Copyright (c) 2026 Lucide Icons and Contributors.
  *
- * IconCheck, IconCopy, IconSquare, IconTrash and IconX derive from icons Lucide
+ * IconCheck, IconCode, IconCopy, IconSquare, IconTrash and IconX derive from icons Lucide
  * inherited from Feather (https://feathericons.com) and additionally carry
  * the MIT License, Copyright (c) 2013-present Cole Bemis.
  *
@@ -83,5 +83,11 @@ export const IconSquarePen = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
     <path d="M18.375 2.625a1.768 1.768 0 1 1 2.5 2.5L12 14l-4 1 1-4Z" />
+  </Svg>
+);
+
+export const IconCode = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />
   </Svg>
 );
