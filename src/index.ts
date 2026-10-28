@@ -6,6 +6,7 @@ export type { LauncherPosition } from './components/Launcher';
 export type {
   FieldNote,
   FieldNoteTarget,
+  FieldNoteSource,
   CaptureRect,
   TargetMode,
   RegionElementSummary,

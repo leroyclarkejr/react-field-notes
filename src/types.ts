@@ -1,5 +1,7 @@
 export type TargetMode = 'element' | 'region';
 
+export type CaptureMode = 'tap' | 'region' | 'code' | 'off';
+
 export interface CaptureRect {
   x: number;
   y: number;
@@ -13,12 +15,19 @@ export interface RegionElementSummary {
   text?: string;
 }
 
+export interface FieldNoteSource {
+  filePath: string;
+  lineNumber?: number;
+  componentName?: string;
+}
+
 export interface FieldNoteTarget {
   label: string;
   domPath: string;
   rect: CaptureRect;
   text?: string;
   componentStack?: string;
+  source?: FieldNoteSource;
   elementCount?: number;
   elements?: RegionElementSummary[];
 }

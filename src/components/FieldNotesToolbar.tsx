@@ -1,16 +1,23 @@
-import { IconList, IconPointer, IconSquare, IconX } from '../icons';
-
-type CaptureMode = 'tap' | 'region' | 'off';
+import type { CaptureMode } from '../types';
+import { IconCode, IconList, IconPointer, IconSquare, IconX } from '../icons';
 
 interface FieldNotesToolbarProps {
   mode: CaptureMode;
   count: number;
+  showCode?: boolean;
   onModeChange: (mode: CaptureMode) => void;
   onShowList: () => void;
   onExit: () => void;
 }
 
-export function FieldNotesToolbar({ mode, count, onModeChange, onShowList, onExit }: FieldNotesToolbarProps) {
+export function FieldNotesToolbar({
+  mode,
+  count,
+  showCode = false,
+  onModeChange,
+  onShowList,
+  onExit,
+}: FieldNotesToolbarProps) {
   return (
     <div className="rfn-root rfn-toolbar">
       <button
@@ -27,6 +34,16 @@ export function FieldNotesToolbar({ mode, count, onModeChange, onShowList, onExi
       >
         <IconSquare /> Region
       </button>
+      {showCode && (
+        <button
+          type="button"
+          title="Click an element to open its source in your editor"
+          data-active={mode === 'code'}
+          onClick={() => onModeChange(mode === 'code' ? 'off' : 'code')}
+        >
+          <IconCode /> Code
+        </button>
+      )}
       <button type="button" aria-label="Show notes" onClick={onShowList}>
         <IconList />
         <span className="rfn-badge">{count}</span>

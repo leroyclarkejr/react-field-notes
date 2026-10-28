@@ -72,6 +72,31 @@ describe('fieldNotesStore', () => {
       expect(result).toContain('stack: <ColorPaletteSection>');
     });
 
+    describe('when a note carries a source location', () => {
+      test('includes the file path and line', () => {
+        const note = makeNote({
+          target: {
+            label: 'SaveButton',
+            domPath: 'form > button',
+            rect: { x: 0, y: 0, w: 10, h: 10 },
+            source: { filePath: '/src/SaveButton.tsx', lineNumber: 12 },
+          },
+        });
+
+        const result = toMarkdown([note]);
+
+        expect(result).toContain('   - source: /src/SaveButton.tsx:12');
+      });
+    });
+
+    describe('when a note has no source location', () => {
+      test('omits the source line', () => {
+        const result = toMarkdown([makeNote()]);
+
+        expect(result).not.toContain('- source:');
+      });
+    });
+
     describe('region notes with element summaries', () => {
       function makeRegionNote(elementCount: number): FieldNote {
         return makeNote({

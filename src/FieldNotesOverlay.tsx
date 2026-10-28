@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { CaptureRect } from './types';
+import type { CaptureRect, FieldNoteSource } from './types';
 import { useFieldNotes } from './FieldNotesProvider';
-import { buildElementTarget, getContextForElement } from './lib/elementContext';
+import { buildElementTarget, formatSource, getContextForElement } from './lib/elementContext';
+import { openInEditor } from './lib/openInEditor';
+import { useSourceSupport } from './lib/useSourceSupport';
 import { buildRegionTargetWithContext, elementsInRect } from './lib/geometry';
 import { FieldNotesToolbar } from './components/FieldNotesToolbar';
 import { AnnotationComposer } from './components/AnnotationComposer';
@@ -18,6 +20,13 @@ import { injectStyles } from './styles';
  * still includes 18.
  */
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+const EDITOR_STATUS_MS = 2000;
+
+interface EditorStatus {
+  role: 'status' | 'alert';
+  text: string;
+}
 
 interface FieldNotesOverlayProps {
   launcher?: boolean;
@@ -64,13 +73,48 @@ export function FieldNotesOverlay({
   const [highlight, setHighlight] = useState<CaptureRect | null>(null);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
 
+  const canOpenSource = useSourceSupport(active);
+  const [editorStatus, setEditorStatus] = useState<EditorStatus | null>(null);
+  const editorStatusTimer = useRef<number | undefined>(undefined);
+
+  const showEditorStatus = useCallback((status: EditorStatus) => {
+    setEditorStatus(status);
+    window.clearTimeout(editorStatusTimer.current);
+    editorStatusTimer.current = window.setTimeout(() => setEditorStatus(null), EDITOR_STATUS_MS);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(editorStatusTimer.current), []);
+
+  // Shared by Code mode, the composer and the notes list, so all three report
+  // the outcome the same way.
+  const openSource = useCallback(
+    async (source: FieldNoteSource): Promise<void> => {
+      const opened = await openInEditor(source);
+      showEditorStatus(
+        opened
+          ? { role: 'status', text: `Opened ${formatSource(source)}` }
+          : { role: 'alert', text: 'Could not open the editor' },
+      );
+    },
+    [showEditorStatus],
+  );
+
+  const handleOpenSource = canOpenSource ? (source: FieldNoteSource) => void openSource(source) : undefined;
+
+  // Code mode is only reachable while it is supported. If support goes away
+  // mid-session (a hybrid laptop switching to touch), fall back to navigate
+  // mode rather than leaving a capture layer up with no button to dismiss it.
+  useEffect(() => {
+    if (mode === 'code' && !canOpenSource) setMode('off');
+  }, [mode, canOpenSource, setMode]);
+
   // The shield listeners are registered once and never re-registered, so they
   // read live state through this ref rather than through their closure.
   // Synced in a layout effect so the ref is current before the browser can
   // dispatch the next pointer event, without writing a ref during render.
-  const live = useRef({ active, mode, draft, showList, beginDraft });
+  const live = useRef({ active, mode, draft, showList, beginDraft, openSource, showEditorStatus });
   useIsomorphicLayoutEffect(() => {
-    live.current = { active, mode, draft, showList, beginDraft };
+    live.current = { active, mode, draft, showList, beginDraft, openSource, showEditorStatus };
   });
 
   useEffect(() => {
@@ -130,7 +174,7 @@ export function FieldNotesOverlay({
     const onPointerMove = (event: PointerEvent) => {
       if (isCapturing() && isOnCaptureLayer(event.target)) {
         shield(event);
-        if (live.current.mode === 'tap') {
+        if (live.current.mode === 'tap' || live.current.mode === 'code') {
           const el = elementUnderPoint(captureRef.current, event.clientX, event.clientY);
           if (!el) return;
           const r = el.getBoundingClientRect();
@@ -156,6 +200,19 @@ export function FieldNotesOverlay({
     const onPointerUp = (event: PointerEvent) => {
       if (isCapturing() && isOnCaptureLayer(event.target)) {
         shield(event);
+
+        if (live.current.mode === 'code') {
+          const el = elementUnderPoint(captureRef.current, event.clientX, event.clientY);
+          if (!el) return;
+          void getContextForElement(el).then((elementCtx) => {
+            if (elementCtx.source) {
+              void live.current.openSource(elementCtx.source);
+              return;
+            }
+            live.current.showEditorStatus({ role: 'status', text: 'No source found for this element' });
+          });
+          return;
+        }
 
         if (live.current.mode === 'tap') {
           const el = elementUnderPoint(captureRef.current, event.clientX, event.clientY);
@@ -273,6 +330,7 @@ export function FieldNotesOverlay({
         <FieldNotesToolbar
           mode={mode}
           count={notes.length}
+          showCode={canOpenSource}
           onModeChange={setMode}
           onShowList={() => setShowList(true)}
           onExit={exit}
@@ -280,7 +338,12 @@ export function FieldNotesOverlay({
       )}
 
       {draft && (
-        <AnnotationComposer target={draft.target} onSave={commitDraft} onCancel={cancelDraft} />
+        <AnnotationComposer
+          target={draft.target}
+          onSave={commitDraft}
+          onCancel={cancelDraft}
+          onOpenSource={handleOpenSource}
+        />
       )}
 
       {showList && (
@@ -289,7 +352,14 @@ export function FieldNotesOverlay({
           onDelete={deleteNote}
           onClear={clearAll}
           onClose={() => setShowList(false)}
+          onOpenSource={handleOpenSource}
         />
+      )}
+
+      {editorStatus && (
+        <div className="rfn-root rfn-status" role={editorStatus.role}>
+          {editorStatus.text}
+        </div>
       )}
     </div>,
     document.body,

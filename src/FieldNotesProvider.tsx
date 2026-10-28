@@ -1,13 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { FieldNote, FieldNoteTarget, TargetMode } from './types';
+import type { CaptureMode, FieldNote, FieldNoteTarget, TargetMode } from './types';
 import { DEFAULT_STORAGE_KEY, loadNotes, persistNotes, toMarkdown } from './lib/fieldNotesStore';
 
 interface DraftSelection {
   mode: TargetMode;
   target: FieldNoteTarget;
 }
-
-type CaptureMode = 'tap' | 'region' | 'off';
 
 interface FieldNotesContextValue {
   active: boolean;

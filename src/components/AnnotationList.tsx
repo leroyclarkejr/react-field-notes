@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FieldNote } from '../types';
+import type { FieldNote, FieldNoteSource } from '../types';
 import { toMarkdown } from '../lib/fieldNotesStore';
-import { IconCheck, IconCopy, IconTrash, IconX } from '../icons';
+import { formatSource } from '../lib/elementContext';
+import { IconCheck, IconCode, IconCopy, IconTrash, IconX } from '../icons';
 
 const COPY_FEEDBACK_MS = 2000;
 
@@ -23,9 +24,10 @@ interface AnnotationListProps {
   onDelete: (id: string) => void;
   onClear: () => void;
   onClose: () => void;
+  onOpenSource?: (source: FieldNoteSource) => void;
 }
 
-export function AnnotationList({ notes, onDelete, onClear, onClose }: AnnotationListProps) {
+export function AnnotationList({ notes, onDelete, onClear, onClose, onOpenSource }: AnnotationListProps) {
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
   const resetTimer = useRef<number | undefined>(undefined);
 
@@ -91,6 +93,7 @@ export function AnnotationList({ notes, onDelete, onClear, onClose }: Annotation
       <div className="rfn-notes">
         {notes.map((note) => {
           const status: CopyStatus = noteCopy?.id === note.id ? noteCopy.status : 'idle';
+          const { source } = note.target;
           return (
             <div key={note.id} className="rfn-note">
               <div>
@@ -101,6 +104,17 @@ export function AnnotationList({ notes, onDelete, onClear, onClose }: Annotation
                 </div>
               </div>
               <div className="rfn-note-actions">
+                {source && onOpenSource && (
+                  <button
+                    type="button"
+                    className="rfn-icon-btn"
+                    aria-label="Open in editor"
+                    title={`Open ${formatSource(source)} in editor`}
+                    onClick={() => onOpenSource(source)}
+                  >
+                    <IconCode size={16} />
+                  </button>
+                )}
                 <button
                   type="button"
                   className="rfn-icon-btn"

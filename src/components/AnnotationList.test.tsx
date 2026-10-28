@@ -13,6 +13,9 @@ const testNote: FieldNote = {
   target: { label: 'button "Save"', domPath: 'button', rect: { x: 0, y: 0, w: 1, h: 1 } },
 };
 
+const testSource = { filePath: '/src/SaveButton.tsx', lineNumber: 12 };
+const testNoteWithSource: FieldNote = { ...testNote, id: 'n2', target: { ...testNote.target, source: testSource } };
+
 describe('AnnotationList', () => {
   beforeEach(() => {
     // Object.assign cannot override navigator.clipboard in jsdom (getter-only after first set).
@@ -188,6 +191,46 @@ describe('AnnotationList', () => {
       await user.click(screen.getByRole('button', { name: /delete note/i }));
 
       expect(onDelete).toHaveBeenCalledWith('n1');
+    });
+  });
+
+  describe('when a note has a source and opening is supported', () => {
+    test('opens the source when the user clicks open in editor', async () => {
+      const user = userEvent.setup();
+      const onOpenSource = vi.fn();
+      render(
+        <AnnotationList
+          notes={[testNoteWithSource]}
+          onDelete={vi.fn()}
+          onClear={vi.fn()}
+          onClose={vi.fn()}
+          onOpenSource={onOpenSource}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /open in editor/i }));
+
+      expect(onOpenSource).toHaveBeenCalledWith(testSource);
+    });
+  });
+
+  describe('when a note has a source but opening is not supported', () => {
+    test('does not offer open in editor', () => {
+      render(
+        <AnnotationList notes={[testNoteWithSource]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+      );
+
+      expect(screen.queryByRole('button', { name: /open in editor/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when a note has no source', () => {
+    test('does not offer open in editor', () => {
+      render(
+        <AnnotationList notes={[testNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} onOpenSource={vi.fn()} />,
+      );
+
+      expect(screen.queryByRole('button', { name: /open in editor/i })).not.toBeInTheDocument();
     });
   });
 });

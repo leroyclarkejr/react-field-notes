@@ -53,4 +53,40 @@ describe('FieldNotesToolbar', () => {
       expect(onExit).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('when open in editor is not supported', () => {
+    test('does not offer Code mode', () => {
+      render(
+        <FieldNotesToolbar mode="tap" count={0} onModeChange={vi.fn()} onShowList={vi.fn()} onExit={vi.fn()} />,
+      );
+
+      expect(screen.queryByRole('button', { name: /code/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when open in editor is supported', () => {
+    test('switches to Code mode', async () => {
+      const user = userEvent.setup();
+      const onModeChange = vi.fn();
+      render(
+        <FieldNotesToolbar showCode mode="tap" count={0} onModeChange={onModeChange} onShowList={vi.fn()} onExit={vi.fn()} />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /code/i }));
+
+      expect(onModeChange).toHaveBeenCalledWith('code');
+    });
+
+    test('toggles Code mode back to navigate (off) mode', async () => {
+      const user = userEvent.setup();
+      const onModeChange = vi.fn();
+      render(
+        <FieldNotesToolbar showCode mode="code" count={0} onModeChange={onModeChange} onShowList={vi.fn()} onExit={vi.fn()} />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /code/i }));
+
+      expect(onModeChange).toHaveBeenCalledWith('off');
+    });
+  });
 });

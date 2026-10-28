@@ -1,5 +1,6 @@
 import { getReactGrabApi } from './reactGrab';
-import type { FieldNoteTarget } from '../types';
+import { resolveElementSource } from './sourceLocation';
+import type { FieldNoteSource, FieldNoteTarget } from '../types';
 
 export interface ElementContext {
   domPath: string;
@@ -7,6 +8,12 @@ export interface ElementContext {
   text?: string;
   displayName?: string;
   stackContext?: string;
+  source?: FieldNoteSource;
+}
+
+/** Renders a source location the way editors and stack traces do: `path:line`. */
+export function formatSource(source: FieldNoteSource): string {
+  return source.lineNumber == null ? source.filePath : `${source.filePath}:${source.lineNumber}`;
 }
 
 /**
@@ -60,14 +67,17 @@ export function labelFromElement(el: Element): string {
 export async function getContextForElement(el: Element): Promise<ElementContext> {
   const domPath = computeDomPath(el);
   const text = textSnippet(el);
+  // Resolved independently of react-grab: the source location comes from
+  // React's own debug info, so it is available with or without that package.
+  const source = await resolveElementSource(el).catch(() => undefined);
   try {
     const api = await getReactGrabApi();
-    if (!api) return { domPath, text, label: labelFromElement(el) };
+    if (!api) return { domPath, text, source, label: labelFromElement(el) };
     const displayName = api.getDisplayName(el) ?? undefined;
     const stackContext = (await api.getStackContext(el)) || undefined;
-    return { domPath, text, displayName, stackContext, label: displayName ?? labelFromElement(el) };
+    return { domPath, text, displayName, stackContext, source, label: displayName ?? labelFromElement(el) };
   } catch {
-    return { domPath, text, label: labelFromElement(el) };
+    return { domPath, text, source, label: labelFromElement(el) };
   }
 }
 
@@ -79,5 +89,6 @@ export function buildElementTarget(el: Element, ctx: ElementContext): FieldNoteT
     rect: { x: r.x, y: r.y, w: r.width, h: r.height },
     text: ctx.text,
     componentStack: ctx.stackContext,
+    source: ctx.source,
   };
 }
