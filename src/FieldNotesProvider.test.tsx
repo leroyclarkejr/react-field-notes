@@ -151,6 +151,25 @@ describe('FieldNotesProvider capture mode', () => {
 
     expect(result.current.mode).toBe('off');
   });
+
+  describe('when a draft is committed', () => {
+    test('returns to navigate mode so the app scrolls again', () => {
+      const { result } = renderHook(() => useFieldNotes(), { wrapper: enabledWrapper });
+
+      act(() => {
+        result.current.toggle();
+        result.current.setMode('tap');
+      });
+      act(() => {
+        result.current.beginDraft({ mode: 'element', target: { label: 'button', domPath: 'button', rect: { x: 0, y: 0, w: 1, h: 1 } } });
+      });
+      act(() => {
+        result.current.commitDraft('make it bigger');
+      });
+
+      expect(result.current.mode).toBe('off');
+    });
+  });
 });
 
 describe('FieldNotesProvider toggle', () => {
