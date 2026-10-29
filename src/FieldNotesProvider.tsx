@@ -133,6 +133,9 @@ export function FieldNotesProvider({
       };
       setNotes((prev) => [...prev, note]);
       setDraft(null);
+      // Staying in a capture mode would keep the capture layer and scroll
+      // lock up, so the app could not be scrolled until a mode was unset.
+      setMode('off');
     },
     [draft],
   );
