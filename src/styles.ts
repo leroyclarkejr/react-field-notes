@@ -146,7 +146,7 @@ export const CSS = `
   margin: 0 0 8px;
   word-break: break-word;
 }
-.rfn-composer textarea {
+.rfn-composer textarea, .rfn-note-edit textarea {
   width: 100%;
   min-height: 72px;
   resize: vertical;
@@ -156,7 +156,7 @@ export const CSS = `
   border: 1px solid var(--rfn-border);
   border-radius: var(--rfn-radius);
 }
-.rfn-composer textarea:focus-visible { outline: 2px solid var(--rfn-accent); outline-offset: 1px; }
+.rfn-composer textarea:focus-visible, .rfn-note-edit textarea:focus-visible { outline: 2px solid var(--rfn-accent); outline-offset: 1px; }
 .rfn-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .rfn-source {
   display: flex;
@@ -225,6 +225,8 @@ export const CSS = `
   border: 1px solid var(--rfn-border);
   border-radius: var(--rfn-radius);
 }
+.rfn-note-body { flex: 1; min-width: 0; }
+.rfn-note-edit { margin-top: 8px; }
 .rfn-note-label { font-weight: 600; word-break: break-word; }
 .rfn-note-comment { word-break: break-word; }
 .rfn-note-meta {

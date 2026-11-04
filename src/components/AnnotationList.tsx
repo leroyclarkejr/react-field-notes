@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { FieldNote, FieldNoteSource } from '../types';
 import { toMarkdown } from '../lib/fieldNotesStore';
 import { formatSource } from '../lib/elementContext';
-import { IconCheck, IconCode, IconCopy, IconTrash, IconX } from '../icons';
+import { IconCheck, IconCode, IconCopy, IconSquarePen, IconTrash, IconX } from '../icons';
 
 const COPY_FEEDBACK_MS = 2000;
 
@@ -19,15 +19,23 @@ const NOTE_COPY_LABEL = {
   failed: 'Copy failed, try again',
 } as const;
 
+interface NoteEdit {
+  id: string;
+  comment: string;
+}
+
 interface AnnotationListProps {
   notes: FieldNote[];
   onDelete: (id: string) => void;
+  onEdit?: (id: string, comment: string) => void;
   onClear: () => void;
   onClose: () => void;
   onOpenSource?: (source: FieldNoteSource) => void;
 }
 
-export function AnnotationList({ notes, onDelete, onClear, onClose, onOpenSource }: AnnotationListProps) {
+export function AnnotationList({ notes, onDelete, onEdit, onClear, onClose, onOpenSource }: AnnotationListProps) {
+  const [noteEdit, setNoteEdit] = useState<NoteEdit | null>(null);
+
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
   const resetTimer = useRef<number | undefined>(undefined);
 
@@ -51,6 +59,11 @@ export function AnnotationList({ notes, onDelete, onClear, onClose, onOpenSource
     }
     window.clearTimeout(noteResetTimer.current);
     noteResetTimer.current = window.setTimeout(() => setNoteCopy(null), COPY_FEEDBACK_MS);
+  };
+
+  const handleSaveEdit = (edit: NoteEdit) => {
+    onEdit?.(edit.id, edit.comment);
+    setNoteEdit(null);
   };
 
   const handleCopyAll = async () => {
@@ -96,9 +109,34 @@ export function AnnotationList({ notes, onDelete, onClear, onClose, onOpenSource
           const { source } = note.target;
           return (
             <div key={note.id} className="rfn-note">
-              <div>
+              <div className="rfn-note-body">
                 <div className="rfn-note-label">{note.target.label}</div>
-                <div className="rfn-note-comment">{note.comment}</div>
+                {noteEdit?.id === note.id ? (
+                  <div className="rfn-note-edit">
+                    <textarea
+                      autoFocus
+                      aria-label="Note comment"
+                      value={noteEdit.comment}
+                      onChange={(e) => setNoteEdit({ id: note.id, comment: e.target.value })}
+                      rows={3}
+                    />
+                    <div className="rfn-actions">
+                      <button type="button" onClick={() => setNoteEdit(null)}>
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        data-active="true"
+                        onClick={() => handleSaveEdit(noteEdit)}
+                        disabled={noteEdit.comment.trim().length === 0}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rfn-note-comment">{note.comment}</div>
+                )}
                 <div className="rfn-note-meta">
                   {note.route} · {note.target.domPath}
                 </div>
@@ -113,6 +151,17 @@ export function AnnotationList({ notes, onDelete, onClear, onClose, onOpenSource
                     onClick={() => onOpenSource(source)}
                   >
                     <IconCode size={16} />
+                  </button>
+                )}
+                {onEdit && (
+                  <button
+                    type="button"
+                    className="rfn-icon-btn"
+                    aria-label="Edit note"
+                    title="Edit note"
+                    onClick={() => setNoteEdit({ id: note.id, comment: note.comment })}
+                  >
+                    <IconSquarePen size={16} />
                   </button>
                 )}
                 <button

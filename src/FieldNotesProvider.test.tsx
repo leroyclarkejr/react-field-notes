@@ -103,6 +103,47 @@ describe('FieldNotesProvider notes', () => {
 
     expect(result.current.notes).toHaveLength(1);
   });
+
+  describe('when a saved note is updated', () => {
+    const testStoredNotes = [
+      { id: 'n1', createdAt: 1, route: '/', mode: 'element', comment: 'make it bigger', target: { label: 'b', domPath: 'b', rect: { x: 0, y: 0, w: 1, h: 1 } } },
+      { id: 'n2', createdAt: 2, route: '/', mode: 'element', comment: 'tighten the padding', target: { label: 'd', domPath: 'd', rect: { x: 0, y: 0, w: 1, h: 1 } } },
+    ];
+
+    beforeEach(() => {
+      localStorage.setItem('test:notes', JSON.stringify(testStoredNotes));
+    });
+
+    test('replaces that note comment', () => {
+      const { result } = renderHook(() => useFieldNotes(), { wrapper: enabledWrapper });
+
+      act(() => {
+        result.current.updateNote('n2', 'add more padding');
+      });
+
+      expect(result.current.notes[1]?.comment).toBe('add more padding');
+    });
+
+    test('leaves the other notes unchanged', () => {
+      const { result } = renderHook(() => useFieldNotes(), { wrapper: enabledWrapper });
+
+      act(() => {
+        result.current.updateNote('n2', 'add more padding');
+      });
+
+      expect(result.current.notes[0]?.comment).toBe('make it bigger');
+    });
+
+    test('persists the new comment', () => {
+      const { result } = renderHook(() => useFieldNotes(), { wrapper: enabledWrapper });
+
+      act(() => {
+        result.current.updateNote('n2', 'add more padding');
+      });
+
+      expect(localStorage.getItem('test:notes')).toContain('add more padding');
+    });
+  });
 });
 
 describe('useFieldNotes without a provider', () => {

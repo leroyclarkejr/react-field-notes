@@ -194,6 +194,72 @@ describe('AnnotationList', () => {
     });
   });
 
+  describe('when editing is not supported', () => {
+    test('does not offer edit note', () => {
+      render(
+        <AnnotationList notes={[testNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} />,
+      );
+
+      expect(screen.queryByRole('button', { name: 'Edit note' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when the user clicks edit note', () => {
+    const user = userEvent.setup();
+    const onEdit = vi.fn();
+
+    beforeEach(async () => {
+      render(
+        <AnnotationList notes={[testNote]} onDelete={vi.fn()} onClear={vi.fn()} onClose={vi.fn()} onEdit={onEdit} />,
+      );
+      await user.click(screen.getByRole('button', { name: 'Edit note' }));
+    });
+
+    test('shows the comment in an editable box', () => {
+      expect(screen.getByRole('textbox', { name: 'Note comment' })).toHaveValue('make it bigger');
+    });
+
+    describe('when the user changes the comment and saves', () => {
+      beforeEach(async () => {
+        const box = screen.getByRole('textbox', { name: 'Note comment' });
+        await user.clear(box);
+        await user.type(box, 'make it smaller');
+        await user.click(screen.getByRole('button', { name: 'Save' }));
+      });
+
+      test('calls onEdit with the note id and new comment', () => {
+        expect(onEdit).toHaveBeenCalledWith('n1', 'make it smaller');
+      });
+
+      test('closes the editable box', () => {
+        expect(screen.queryByRole('textbox', { name: 'Note comment' })).not.toBeInTheDocument();
+      });
+    });
+
+    describe('when the user clears the comment', () => {
+      test('disables save', async () => {
+        await user.clear(screen.getByRole('textbox', { name: 'Note comment' }));
+
+        expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      });
+    });
+
+    describe('when the user changes the comment and cancels', () => {
+      beforeEach(async () => {
+        await user.type(screen.getByRole('textbox', { name: 'Note comment' }), ' please');
+        await user.click(screen.getByRole('button', { name: 'Cancel' }));
+      });
+
+      test('does not call onEdit', () => {
+        expect(onEdit).not.toHaveBeenCalled();
+      });
+
+      test('shows the original comment', () => {
+        expect(screen.getByText('make it bigger')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('when a note has a source and opening is supported', () => {
     test('opens the source when the user clicks open in editor', async () => {
       const user = userEvent.setup();

@@ -21,6 +21,7 @@ interface FieldNotesContextValue {
   beginDraft: (draft: DraftSelection) => void;
   cancelDraft: () => void;
   commitDraft: (comment: string) => void;
+  updateNote: (id: string, comment: string) => void;
   deleteNote: (id: string) => void;
   clearAll: () => void;
   exportMarkdown: () => string;
@@ -49,6 +50,7 @@ const NOOP_VALUE: FieldNotesContextValue = {
   beginDraft: () => {},
   cancelDraft: () => {},
   commitDraft: () => {},
+  updateNote: () => {},
   deleteNote: () => {},
   clearAll: () => {},
   exportMarkdown: () => '',
@@ -140,6 +142,10 @@ export function FieldNotesProvider({
     [draft],
   );
 
+  const updateNote = useCallback(
+    (id: string, comment: string) => setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, comment } : n))),
+    [],
+  );
   const deleteNote = useCallback((id: string) => setNotes((prev) => prev.filter((n) => n.id !== id)), []);
   const clearAll = useCallback(() => setNotes([]), []);
   const exportMarkdown = useCallback(() => toMarkdown(notes), [notes]);
@@ -165,12 +171,13 @@ export function FieldNotesProvider({
       beginDraft,
       cancelDraft,
       commitDraft,
+      updateNote,
       deleteNote,
       clearAll,
       exportMarkdown,
       exit,
     }),
-    [active, mode, notes, draft, showList, registerLogoTap, toggle, registerTap, beginDraft, cancelDraft, commitDraft, deleteNote, clearAll, exportMarkdown, exit],
+    [active, mode, notes, draft, showList, registerLogoTap, toggle, registerTap, beginDraft, cancelDraft, commitDraft, updateNote, deleteNote, clearAll, exportMarkdown, exit],
   );
 
   return <FieldNotesContext.Provider value={value}>{children}</FieldNotesContext.Provider>;

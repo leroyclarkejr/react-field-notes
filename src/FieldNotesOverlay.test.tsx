@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { FieldNotesProvider, useFieldNotes } from './FieldNotesProvider';
 import { FieldNotesOverlay } from './FieldNotesOverlay';
 
@@ -218,6 +218,29 @@ describe('FieldNotesOverlay', () => {
       await user.type(textarea, 'hello');
 
       expect(textarea).toHaveValue('hello');
+    });
+  });
+
+  describe('when the user edits a saved note from the notes list', () => {
+    const user = userEvent.setup();
+
+    beforeEach(async () => {
+      localStorage.clear();
+      const { activate, openComposer } = setup();
+      activate();
+      openComposer();
+      await user.type(screen.getByPlaceholderText('What do you want to change here?'), 'make it bigger');
+      await user.click(screen.getByRole('button', { name: 'Save' }));
+      await user.click(screen.getByRole('button', { name: 'Show notes' }));
+      await user.click(screen.getByRole('button', { name: 'Edit note' }));
+      const box = screen.getByRole('textbox', { name: 'Note comment' });
+      await user.clear(box);
+      await user.type(box, 'make it smaller');
+      await user.click(screen.getByRole('button', { name: 'Save' }));
+    });
+
+    test('shows the edited comment in the list', () => {
+      expect(screen.getByText('make it smaller')).toBeInTheDocument();
     });
   });
 

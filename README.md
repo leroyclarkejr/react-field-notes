@@ -97,8 +97,9 @@ export function App() {
 3. **Write the note** in the dialog that opens ("What do you want to change
    here?") and press **Save**. Repeat for as many changes as you like — notes
    survive reloads.
-4. **Open the list** with the counter button to review, delete, or clear
-   notes.
+4. **Open the list** with the counter button to review, edit, delete, or clear
+   notes. The pencil on a note turns its comment into a text box; press
+   **Save** to keep the change or **Cancel** to drop it.
 5. **Press Copy all** and paste the result into your coding agent, or use the copy
    button on a single note to send just that one.
 
