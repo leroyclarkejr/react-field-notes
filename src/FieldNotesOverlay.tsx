@@ -64,6 +64,7 @@ export function FieldNotesOverlay({
     beginDraft,
     cancelDraft,
     commitDraft,
+    updateNote,
     deleteNote,
     clearAll,
     exit,
@@ -350,6 +351,7 @@ export function FieldNotesOverlay({
         <AnnotationList
           notes={notes}
           onDelete={deleteNote}
+          onEdit={updateNote}
           onClear={clearAll}
           onClose={() => setShowList(false)}
           onOpenSource={handleOpenSource}
